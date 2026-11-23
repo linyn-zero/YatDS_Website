@@ -35,10 +35,34 @@ jobs:
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
+      - name: Prepare course website
+        env:
+          PUBLISH_DIR: ${{ runner.temp }}/course-pages
+        run: |
+          mkdir -p "$PUBLISH_DIR/dataStructure"
+
+          # 将整套课程网站发布到 /dataStructure/ 下
+          cp -a ./site/. "$PUBLISH_DIR/dataStructure/"
+
+          # 给 course.yatcc-ai.com 的根路径提供一个课程入口
+          cat > "$PUBLISH_DIR/index.html" <<'HTML'
+          <!doctype html>
+          <html lang="zh-CN">
+          <head>
+            <meta charset="utf-8">
+            <title>课程入口</title>
+          </head>
+          <body>
+            <h1>课程入口</h1>
+            <p><a href="./dataStructure/">进入数据结构课程</a></p>
+          </body>
+          </html>
+          HTML
+
       - name: Upload static website
         uses: actions/upload-pages-artifact@v4
         with:
-          path: ./site
+          path: ${{ runner.temp }}/course-pages
 
       - name: Deploy to GitHub Pages
         id: deployment
